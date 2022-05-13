@@ -353,7 +353,7 @@ class RasterTiler(object):
                     dst_height=self.dest_tile_size[0],
                     dst_width=self.dest_tile_size[1])
 
-                if self.dest_crs != self.src_crs and self.resampling_method is not None:
+                if self.dest_crs != self.src_crs and self.resampling is not None:
                     tile_data = np.zeros(shape=(src_data.shape[0], height, width), dtype=src_data.dtype)
                     rasterio.warp.reproject(
                         source=src_data,
@@ -365,7 +365,7 @@ class RasterTiler(object):
                         dst_nodata=self.nodata,
                         resampling=getattr(Resampling, self.resampling))
 
-                elif self.dest_crs != self.src_crs and self.resampling_method is None:
+                elif self.dest_crs != self.src_crs and self.resampling is None:
                     print("Warning: You've set resampling to None but your "
                           "destination projection differs from the source "
                           "projection. Using bilinear resampling by default.")
@@ -412,7 +412,6 @@ class RasterTiler(object):
                 profile.update(count=1)
             else:
                 profile.update(count=tile_data.shape[0])
-
             yield tile_data, mask, profile, tb
 
     def save_tile(self, tile_data, mask, profile, dest_fname_base=None):
