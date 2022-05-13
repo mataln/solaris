@@ -94,10 +94,14 @@ class VectorTiler(object):
         self.tile_paths = []
         for tile_gdf, tb in tqdm(tile_gen):
             if self.proj_unit not in ['meter', 'metre']:
+                if self.dest_crs == 4326:
+                  fname_dp = 8
+                else:
+                  fname_dp = 3
                 dest_path = os.path.join(
                     self.dest_dir, '{}_{}_{}{}'.format(dest_fname_base,
-                                                       np.round(tb[0], 3),
-                                                       np.round(tb[3], 3),
+                                                       np.round(tb[0], fname_dp),
+                                                       np.round(tb[3], fname_dp),
                                                        output_ext))
             else:
                 dest_path = os.path.join(
