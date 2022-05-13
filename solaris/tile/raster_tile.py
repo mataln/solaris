@@ -422,10 +422,14 @@ class RasterTiler(object):
         else:
             dest_fname_root = dest_fname_base
         if self.proj_unit not in ['meter', 'metre']:
+            if self.dest_crs == 4326:
+                fname_dp = 8
+            else:
+                fname_dp = 3
             dest_fname = '{}_{}_{}.tif'.format(
                 dest_fname_root,
-                np.round(profile['transform'][2], 3),
-                np.round(profile['transform'][5], 3))
+                np.round(profile['transform'][2], fname_dp),
+                np.round(profile['transform'][5], fname_dp))
         else:
             dest_fname = '{}_{}_{}.tif'.format(
                 dest_fname_root,
