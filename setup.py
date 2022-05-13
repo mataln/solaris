@@ -90,7 +90,7 @@ extra_reqs = {
     'test': ['mock', 'pytest', 'pytest-cov', 'codecov']}
 
 # workaround until new shapely release is out
-os.system('pip install  git+git://github.com/toblerity/shapely@master')
+os.system('pip install https://github.com/toblerity/shapely@master')
 
 
 project_name = 'solaris'
