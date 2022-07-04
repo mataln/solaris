@@ -222,6 +222,9 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
             logger.debug('do_matches is True, finding matching image')
             logger.debug('Converting to pixel coordinates.')
             if len(curr_gdf) > 0:  # if there are geoms, reproj to px coords
+                #print('FOO IN A SHOE')
+                #print(type(curr_gdf))
+                #print(type(override_crs))
                 curr_gdf = geojson_to_px_gdf(
                     curr_gdf,
                     override_crs=override_crs,
