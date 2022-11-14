@@ -527,6 +527,7 @@ def split_multi_geometries(gdf, obj_id_col=None, group_col=None,
     if obj_id_col:
         gdf2[obj_id_col] = gdf2.groupby(group_col).cumcount()+1
 
+    #print(gdf2) #Contains GeometryCollection
     return gdf2
 
 
@@ -573,18 +574,26 @@ def get_subgraph(G, node_subset):
 
 def _split_multigeom_row(gdf_row, geom_col):
     new_rows = []
+    #if isinstance(gdf_row[geom_col], GeometryCollection):
+    #    print("FOUND GEOMETRYCOLLECTION")
+    #    for x in gdf_row[geom_col].geoms:
+    #        print(x)
     if isinstance(gdf_row[geom_col], MultiPolygon) \
-            or isinstance(gdf_row[geom_col], MultiLineString):
+            or isinstance(gdf_row[geom_col], MultiLineString) \
+            or isinstance(gdf_row[geom_col], GeometryCollection): #This line added by matt to fix exploding multipolygons
         new_polys = _split_multigeom(gdf_row[geom_col])
         for poly in new_polys:
-            row_w_poly = gdf_row.copy()
-            row_w_poly[geom_col] = poly
-            new_rows.append(row_w_poly)
+            if isinstance(poly, Polygon):
+                row_w_poly = gdf_row.copy()
+                row_w_poly[geom_col] = poly
+                new_rows.append(row_w_poly)
+        #print()
     return pd.DataFrame(new_rows)
 
 
 def _split_multigeom(multigeom):
-    return list(multigeom)
+    #return list(multigeom)
+    return multigeom.geoms
 
 
 def _reduce_geom_precision(geom, precision=2):
@@ -732,7 +741,7 @@ def polygon_to_coco(polygon):
     elif isinstance(polygon, MultiPolygon):
         raise ValueError("You have MultiPolygon types in your label df. Remove, explode, or fix these to be Polygon geometry types.")
     else:
-        raise ValueError('polygon must be a shapely geometry or WKT.')
+        raise ValueError(f'Polygon must be a shapely geometry or WKT. Polygon type is {type(polygon)}')
     # zip together x,y pairs
     coords = list(zip(coords[0], coords[1]))
     coords = [item for coordinate in coords for item in coordinate]

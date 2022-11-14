@@ -197,6 +197,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
     label_df = pd.DataFrame({'label_fname': [],
                              'category_str': [],
                              'geometry': []})
+
     for gj in tqdm(label_list):
         logger.debug('Reading in {}'.format(gj))
         curr_gdf = gpd.read_file(gj)
@@ -206,7 +207,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
         if remove_all_multipolygons is True and explode_all_multipolygons is False:
             curr_gdf = remove_multipolygons(curr_gdf)
         elif explode_all_multipolygons is True:
-            curr_gdf = split_multi_geometries(curr_gdf)
+            curr_gdf = split_multi_geometries(curr_gdf) #Contains GeometryCollection
 
         curr_gdf['label_fname'] = gj
         curr_gdf['image_fname'] = ''
@@ -222,9 +223,6 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
             logger.debug('do_matches is True, finding matching image')
             logger.debug('Converting to pixel coordinates.')
             if len(curr_gdf) > 0:  # if there are geoms, reproj to px coords
-                #print('FOO IN A SHOE')
-                #print(type(curr_gdf))
-                #print(type(override_crs))
                 curr_gdf = geojson_to_px_gdf(
                     curr_gdf,
                     override_crs=override_crs,
@@ -237,7 +235,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
             logger.debug('do_matches is False. Many images:1 label detected.')
             raise NotImplementedError('one label file: many images '
                                       'not implemented yet.')
-        elif len(image_ref) == 1 and len(label_list) == 1:
+        elif len(image_ref) == 1 and len(label_list) == 1: 
             logger.debug('do_matches is False. 1 image:1 label detected.')
             logger.debug('Converting to pixel coordinates.')
             # match the two images
@@ -253,8 +251,14 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
         else:
             curr_gdf = curr_gdf[['image_id', 'label_fname', 'category_str',
                                  'geometry']]
+
+        #print(curr_gdf) #Contains a GeometryCollection, after tqdm 50/121, image id 68
+
         label_df = pd.concat([label_df, curr_gdf], axis='index',
                              ignore_index=True, sort=False)
+
+    #print(label_df.iloc[264])
+    #print()
 
     logger.info('Finished loading labels.')
     logger.info('Generating COCO-formatted annotations.')
@@ -443,6 +447,9 @@ def df_to_coco_annos(df, output_path=None, geom_col='geometry',
                     'bbox': row['bbox'],
                     'iscrowd': 0}
 
+    #print(temp_df.iloc[264])
+    #print(temp_df.iloc[264]['label_fname'])
+    #print(temp_df.iloc[264]['bbox'])
     coco_annotations = temp_df.apply(_row_to_coco, axis=1, geom_col=geom_col,
                                      category_id_col='category_id',
                                      image_id_col=image_id_col,
