@@ -15,8 +15,8 @@ import logging
 def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
                  matching_re=None, category_attribute=None, score_attribute=None,
                  preset_categories=None, include_other=True, info_dict=None,
-                 license_dict=None, recursive=False, override_crs=False,
-                 explode_all_multipolygons=False, remove_all_multipolygons=False,
+                 license_dict=None, file_prefix=None, recursive=False, 
+                 override_crs=False, explode_all_multipolygons=False, remove_all_multipolygons=False,
                  verbose=0):
     """Generate COCO-formatted labels from one or multiple geojsons and images.
 
@@ -295,7 +295,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
         logger.debug('No license information provided, skipping for image '
                      'COCO records.')
         license_id = None
-    coco_image_records = make_coco_image_dict(image_ref, license_id)
+    coco_image_records = make_coco_image_dict(image_ref, license_id, file_prefix=file_prefix)
     coco_dataset['images'] = coco_image_records
 
     logger.info('Adding any additional information provided as arguments.')
@@ -505,7 +505,7 @@ def coco_categories_dict_from_df(df, category_id_col, category_name_col,
     return coco_cat_df.to_dict(orient='records')
 
 
-def make_coco_image_dict(image_ref, license_id=None):
+def make_coco_image_dict(image_ref, license_id=None, file_prefix = None):
     """Take a dict of ``image_fname: image_id`` pairs and make a coco dict.
 
     Note that this creates a relatively limited version of the standard
@@ -533,6 +533,9 @@ def make_coco_image_dict(image_ref, license_id=None):
     coco_images : list
         A list of COCO-formatted image records ready for export to json.
     """
+    if file_prefix:
+        if len(file_prefix) > 1 and file_prefix[-1] != '/':
+            file_prefix += '/'
 
     image_records = []
     for image_fname, image_id in image_ref.items():
@@ -540,7 +543,7 @@ def make_coco_image_dict(image_ref, license_id=None):
             width = f.width
             height = f.height
         im_record = {'id': image_id,
-                     'file_name': os.path.split(image_fname)[1],
+                     'file_name': file_prefix + os.path.split(image_fname)[1],
                      'width': width,
                      'height': height}
         if license_id is not None:
