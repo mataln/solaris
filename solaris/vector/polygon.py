@@ -8,6 +8,7 @@ from ..utils.geo import list_to_affine, _reduce_geom_precision
 from ..utils.core import _check_gdf_load, _check_crs, _check_rasterio_im_load
 from ..raster.image import get_geo_transform
 from shapely.geometry import box, Polygon
+from shapely.geometry.base import BaseGeometry
 import pandas as pd
 import geopandas as gpd
 from rtree.core import RTreeError
@@ -123,7 +124,7 @@ def affine_transform_gdf(gdf, affine_obj, inverse=False, geom_col="geometry",
                 "The file format is incompatible with this function.")
     if 'geometry' not in gdf.columns:
         gdf = gdf.rename(columns={geom_col: 'geometry'})
-    if not isinstance(gdf['geometry'][0], Polygon):
+    if not isinstance(gdf['geometry'][0], BaseGeometry): #Changed by matt from Polygon to BaseGeometry to facilitate converting points to px coords
         gdf['geometry'] = gdf['geometry'].apply(shapely.wkt.loads)
     gdf["geometry"] = gdf["geometry"].apply(convert_poly_coords,
                                             affine_obj=affine_obj,
