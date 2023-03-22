@@ -124,7 +124,7 @@ def affine_transform_gdf(gdf, affine_obj, inverse=False, geom_col="geometry",
                 "The file format is incompatible with this function.")
     if 'geometry' not in gdf.columns:
         gdf = gdf.rename(columns={geom_col: 'geometry'})
-    if not isinstance(gdf['geometry'][0], BaseGeometry): #Changed by matt from Polygon to BaseGeometry to facilitate converting points to px coords
+    if not isinstance(gdf['geometry'].iloc[0], BaseGeometry): #Changed by matt from Polygon to BaseGeometry to facilitate converting points to px coords. Also added iloc to fix bug for indices not starting at 0
         gdf['geometry'] = gdf['geometry'].apply(shapely.wkt.loads)
     gdf["geometry"] = gdf["geometry"].apply(convert_poly_coords,
                                             affine_obj=affine_obj,
