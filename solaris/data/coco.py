@@ -10,7 +10,7 @@ import os
 import pandas as pd
 import geopandas as gpd
 import logging
-
+import warnings
 
 def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
                  matching_re=None, category_attribute=None, score_attribute=None,
@@ -191,6 +191,8 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
                 lambda x: os.path.splitext(os.path.split(x)[1])[0])
             label_names['match_substr'] = label_names['match_substr'].astype(
                 str)
+        # print(im_names)
+        # print(label_names)
         match_df = im_names.merge(label_names, on='match_substr', how='inner')
 
     logger.info('Loading labels.')
@@ -222,6 +224,9 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
         if do_matches:  # multiple images: multiple labels
             logger.debug('do_matches is True, finding matching image')
             logger.debug('Converting to pixel coordinates.')
+            #print(match_df)
+            #print(match_df['label_fname'])
+            #print(match_df['image_fname'])
             if len(curr_gdf) > 0:  # if there are geoms, reproj to px coords
                 curr_gdf = geojson_to_px_gdf(
                     curr_gdf,

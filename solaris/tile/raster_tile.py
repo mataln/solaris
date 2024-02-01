@@ -421,20 +421,34 @@ class RasterTiler(object):
                 os.path.split(self.src_path)[1])[0]
         else:
             dest_fname_root = dest_fname_base
+
+
+
+
         if self.proj_unit not in ['meter', 'metre']:
-            if self.dest_crs == 4326:
-                fname_dp = 8
-            else:
-                fname_dp = 3
-            dest_fname = '{}_{}_{}.tif'.format(
+            fname_dp = 9
+            dest_fname = '{}_{:.{}f}_{:.{}f}.tif'.format(
                 dest_fname_root,
-                np.round(profile['transform'][2], fname_dp),
-                np.round(profile['transform'][5], fname_dp))
+                profile['transform'][2], fname_dp,
+                profile['transform'][5], fname_dp)
+            # if self.dest_crs == 4326:
+            #     fname_dp = 8
+            # else:
+            #     fname_dp = 3
+            # dest_fname = '{}_{}_{}.tif'.format(
+            #     dest_fname_root,
+            #     np.round(profile['transform'][2], fname_dp),
+            #     np.round(profile['transform'][5], fname_dp))
         else:
-            dest_fname = '{}_{}_{}.tif'.format(
+            fname_dp = 9
+            dest_fname = '{}_{:.{}f}_{:.{}f}.tif'.format(
                 dest_fname_root,
-                int(profile['transform'][2]),
-                int(profile['transform'][5]))
+                profile['transform'][2], fname_dp,
+                profile['transform'][5], fname_dp)
+            # dest_fname = '{}_{}_{}.tif'.format(
+            #     dest_fname_root,
+            #     int(profile['transform'][2]),
+            #     int(profile['transform'][5]))
         # if self.cog_output:
         #     dest_path = os.path.join(self.dest_dir, 'tmp.tif')
         # else:

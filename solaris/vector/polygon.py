@@ -238,6 +238,8 @@ def geojson_to_px_gdf(geojson, im_path, geom_col='geometry', precision=None,
     # make sure the geo vector data is loaded in as geodataframe(s)
     gdf = _check_gdf_load(geojson)
 
+    # print(im_path)
+    # print(gdf.head())
 
     if len(gdf):  # if there's at least one geometry
         if override_crs:
