@@ -7,7 +7,7 @@ from rasterio.crs import CRS
 from ..utils.geo import list_to_affine, _reduce_geom_precision
 from ..utils.core import _check_gdf_load, _check_crs, _check_rasterio_im_load
 from ..raster.image import get_geo_transform
-from shapely.geometry import box, Polygon
+from shapely.geometry import box, Polygon, Point
 from shapely.geometry.base import BaseGeometry
 import pandas as pd
 import geopandas as gpd
@@ -238,8 +238,12 @@ def geojson_to_px_gdf(geojson, im_path, geom_col='geometry', precision=None,
     # make sure the geo vector data is loaded in as geodataframe(s)
     gdf = _check_gdf_load(geojson)
 
-    # print(im_path)
-    # print(gdf.head())
+    #IF the only geometry is Point(0,0) then remove it
+    if len(gdf) == 1 and gdf.iloc[0].geometry == shapely.geometry.Point(0,0):
+        gdf = gdf.drop(0)
+        gdf.crs = None
+        return gdf #Return the empty gdf
+
 
     if len(gdf):  # if there's at least one geometry
         if override_crs:

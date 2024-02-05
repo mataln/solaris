@@ -17,6 +17,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
                  preset_categories=None, include_other=True, info_dict=None,
                  license_dict=None, file_prefix=None, recursive=False, 
                  override_crs=False, explode_all_multipolygons=False, remove_all_multipolygons=False,
+                 extra_annotation_attributes=None,
                  verbose=0):
     """Generate COCO-formatted labels from one or multiple geojsons and images.
 
@@ -225,8 +226,10 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
             logger.debug('do_matches is True, finding matching image')
             logger.debug('Converting to pixel coordinates.')
             #print(match_df)
+            #print(match_df.columns)
             #print(match_df['label_fname'])
             #print(match_df['image_fname'])
+            #print(match_df.iloc[0])
             if len(curr_gdf) > 0:  # if there are geoms, reproj to px coords
                 curr_gdf = geojson_to_px_gdf(
                     curr_gdf,
@@ -250,20 +253,35 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
             curr_gdf['image_id'] = list(image_ref.values())[0]
         curr_gdf = curr_gdf.rename(
             columns={tmp_category_attribute: 'category_str'})
+        #print(curr_gdf.columns) #['id', 'category_str', 'tax_class', 'tax_order', 'tax_family','tax_genus', 'tax_species', 'label_src', 'height', 'origarea','origlen', 'partialDec', 'truncated', 'geometry', 'label_fname','image_fname', 'image_id']
+        cols_to_keep = ['image_id', 'label_fname', 'category_str', 'geometry']
         if score_attribute is not None:
-            curr_gdf = curr_gdf[['image_id', 'label_fname', 'category_str',
-                                 score_attribute, 'geometry']]
-        else:
-            curr_gdf = curr_gdf[['image_id', 'label_fname', 'category_str',
-                                 'geometry']]
+            cols_to_keep.append(score_attribute)
+        if extra_annotation_attributes is not None:
+            cols_to_keep += extra_annotation_attributes
+
+        curr_gdf = curr_gdf[cols_to_keep]
+
+
+        # if score_attribute is not None:
+        #     curr_gdf = curr_gdf[['image_id', 'label_fname', 'category_str',
+        #                          score_attribute, 'geometry']]
+        # else:
+        #     curr_gdf = curr_gdf[['image_id', 'label_fname', 'category_str',
+        #                          'geometry']]
+        #print(curr_gdf.columns) #['image_id', 'label_fname', 'category_str', 'geometry']
 
         #print(curr_gdf) #Contains a GeometryCollection, after tqdm 50/121, image id 68
-
         label_df = pd.concat([label_df, curr_gdf], axis='index',
                              ignore_index=True, sort=False)
 
+        
+
     #print(label_df.iloc[264])
     #print()
+        
+    #print(label_df.iloc[0])
+    #print(label_df.columns)
 
     logger.info('Finished loading labels.')
     logger.info('Generating COCO-formatted annotations.')
@@ -274,6 +292,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
                                     score_col=score_attribute,
                                     preset_categories=preset_categories,
                                     include_other=include_other,
+                                    extra_annotation_attributes=extra_annotation_attributes,
                                     verbose=verbose)
 
     logger.info('Generating COCO-formatted image and license records.')
@@ -306,7 +325,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
     logger.info('Adding any additional information provided as arguments.')
     if info_dict is not None:
         coco_dataset['info'] = info_dict
-
+    
     if output_path is not None:
         with open(output_path, 'w') as outfile:
             json.dump(coco_dataset, outfile)
@@ -317,7 +336,8 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
 def df_to_coco_annos(df, output_path=None, geom_col='geometry',
                      image_id_col=None, category_col=None, score_col=None,
                      preset_categories=None, supercategory_col=None,
-                     include_other=True, starting_id=1, verbose=0):
+                     include_other=True, starting_id=0, extra_annotation_attributes=None, 
+                     verbose=0):
     """Extract COCO-formatted annotations from a pandas ``DataFrame``.
 
     This function assumes that *annotations are already in pixel coordinates.*
@@ -432,25 +452,36 @@ def df_to_coco_annos(df, output_path=None, geom_col='geometry',
         temp_df['score'] = df[score_col]
 
     def _row_to_coco(row, geom_col, category_id_col, image_id_col, score_col):
-        "get a single annotation record from a row of temp_df."
+        #"get a single annotation record from a row of temp_df."
         if score_col is None:
+            coco_row = {'id': row['annotation_id'],
+                        'image_id': int(row[image_id_col]),
+                        'category_id': int(row[category_id_col]),
+                        'segmentation': [polygon_to_coco(row[geom_col])],
+                        'area': row['area'],
+                        'bbox': row['bbox'],
+                        'iscrowd': 0}
+            
+            if extra_annotation_attributes is not None:
+                for attr in extra_annotation_attributes:
+                    coco_row[attr] = row[attr]
 
-            return {'id': row['annotation_id'],
-                    'image_id': int(row[image_id_col]),
-                    'category_id': int(row[category_id_col]),
-                    'segmentation': [polygon_to_coco(row[geom_col])],
-                    'area': row['area'],
-                    'bbox': row['bbox'],
-                    'iscrowd': 0}
+            return coco_row
         else:
-            return {'id': row['annotation_id'],
-                    'image_id': int(row[image_id_col]),
-                    'category_id': int(row[category_id_col]),
-                    'segmentation': [polygon_to_coco(row[geom_col])],
-                    'score': float(row[score_col]),
-                    'area': row['area'],
-                    'bbox': row['bbox'],
-                    'iscrowd': 0}
+            coco_row = {'id': row['annotation_id'],
+                        'image_id': int(row[image_id_col]),
+                        'category_id': int(row[category_id_col]),
+                        'segmentation': [polygon_to_coco(row[geom_col])],
+                        'area': row['area'],
+                        'bbox': row['bbox'],
+                        'iscrowd': 0,
+                        'score': row[score_col]}
+            
+            if extra_annotation_attributes is not None:
+                for attr in extra_annotation_attributes:
+                    coco_row[attr] = row[attr]
+
+            return coco_row
 
     #print(temp_df.iloc[264])
     #print(temp_df.iloc[264]['label_fname'])

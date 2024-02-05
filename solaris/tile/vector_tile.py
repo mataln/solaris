@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from shapely.geometry import box, Polygon
+from shapely.geometry import box, Polygon, Point
 import geopandas as gpd
 from ..utils.core import _check_gdf_load, _check_crs
 from ..utils.tile import save_empty_geojson
@@ -127,7 +127,15 @@ class VectorTiler(object):
             if len(tile_gdf) > 0:
                 tile_gdf.to_file(dest_path, driver='GeoJSON')
             else:
-                save_empty_geojson(dest_path, self.dest_crs)
+                #Add dummy geometry to preserve column names
+                new_row = {'geometry': Point(0, 0)}
+                for column in tile_gdf.columns.drop('geometry'):
+                    new_row[column] = None
+                
+                tile_gdf = tile_gdf.append(new_row, ignore_index=True)
+                tile_gdf.to_file(dest_path, driver='GeoJSON')
+
+                #save_empty_geojson(dest_path, self.dest_crs)
 
     def tile_generator(self, src, tile_bounds, tile_bounds_crs=None,
                        geom_type='Polygon', split_multi_geoms=True,
@@ -238,7 +246,7 @@ def search_gdf_polygon(gdf, tile_polygon):
         possible_matches.intersects(tile_polygon)
         ]
     if precise_matches.empty:
-        precise_matches = gpd.GeoDataFrame(geometry=[])
+        precise_matches = gpd.GeoDataFrame(columns=gdf.columns, crs=gdf.crs) #gpd.GeoDataFrame(geometry=[])
     return precise_matches
 
 
