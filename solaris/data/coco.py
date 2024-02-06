@@ -17,7 +17,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
                  preset_categories=None, include_other=True, info_dict=None,
                  license_dict=None, file_prefix=None, recursive=False, 
                  override_crs=False, explode_all_multipolygons=False, remove_all_multipolygons=False,
-                 extra_annotation_attributes=None,
+                 extra_annotation_attributes=None, extra_image_attributes=None,
                  verbose=0):
     """Generate COCO-formatted labels from one or multiple geojsons and images.
 
@@ -319,7 +319,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
         logger.debug('No license information provided, skipping for image '
                      'COCO records.')
         license_id = None
-    coco_image_records = make_coco_image_dict(image_ref, license_id, file_prefix=file_prefix)
+    coco_image_records = make_coco_image_dict(image_ref, license_id, file_prefix=file_prefix, extra_image_attributes=extra_image_attributes)
     coco_dataset['images'] = coco_image_records
 
     logger.info('Adding any additional information provided as arguments.')
@@ -541,7 +541,7 @@ def coco_categories_dict_from_df(df, category_id_col, category_name_col,
     return coco_cat_df.to_dict(orient='records')
 
 
-def make_coco_image_dict(image_ref, license_id=None, file_prefix = None):
+def make_coco_image_dict(image_ref, license_id=None, file_prefix = None, extra_image_attributes=None):
     """Take a dict of ``image_fname: image_id`` pairs and make a coco dict.
 
     Note that this creates a relatively limited version of the standard
@@ -582,6 +582,9 @@ def make_coco_image_dict(image_ref, license_id=None, file_prefix = None):
                      'file_name': file_prefix + os.path.split(image_fname)[1],
                      'width': width,
                      'height': height}
+        if extra_image_attributes is not None:
+            for attr in extra_image_attributes:
+                im_record[attr] = extra_image_attributes[attr]
         if license_id is not None:
             im_record['license'] = license_id
         image_records.append(im_record)
