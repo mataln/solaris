@@ -425,14 +425,14 @@ def df_to_coco_annos(df, output_path=None, geom_col='geometry',
         category_names = list(temp_df[category_col].unique())
         logger.info('Generating category ID numbers arbitrarily.')
         category_dict = {k: v for k, v in zip(category_names,
-                                              range(1, len(category_names)+1))}
+                                              range(0, len(category_names)))}
     else:
         logger.debug('No category column or preset categories.')
         logger.info('Setting category to "other" for all objects.')
         category_col = 'category_col'
         temp_df[category_col] = 'other'
         category_names = ['other']
-        category_dict = {'other': 1}
+        category_dict = {'other': 0}
 
     if image_id_col is None:
         temp_df['image_id'] = 1
