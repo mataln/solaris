@@ -198,6 +198,7 @@ class VectorTiler(object):
         else:
             reproject_bounds = False
 
+
         self.proj_unit = get_projection_unit(self.src_crs)
         if getattr(self, 'dest_crs', None) is None:
             self.dest_crs = self.src_crs
@@ -325,10 +326,13 @@ def clip_gdf(gdf, tile_bounds, min_partial_perc=0.0, geom_type="Polygon",
             gdf['origlen'] = 0
     # TODO must implement different case for lines and for spatialIndex
     # (Assume RTree is already performed)
+            
+
+    # Fix geometries in gdf
+    gdf['geometry'] = gdf['geometry'].apply(lambda geom: geom.buffer(0) if not geom.is_valid else geom)
 
     cut_gdf = gdf.copy()
     cut_gdf.geometry = gdf.intersection(tb)
-
     if geom_type == 'Polygon':
         cut_gdf['partialDec'] = cut_gdf.area / cut_gdf['origarea']
         cut_gdf = cut_gdf.loc[cut_gdf['partialDec'] > min_partial_perc, :]

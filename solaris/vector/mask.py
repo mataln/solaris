@@ -191,6 +191,8 @@ def footprint_mask(df, out_file=None, reference_im=None, geom_col='geometry',
             'If saving output to file, `reference_im` must be provided.')
     df = _check_df_load(df)
 
+    print(df)
+
     if len(df) == 0 and not out_file:
         return np.zeros(shape=shape, dtype='uint8')
 

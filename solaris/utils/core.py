@@ -39,6 +39,7 @@ def _check_skimage_im_load(im):
 def _check_df_load(df):
     """Check if `df` is already loaded in, if not, load from file."""
     if isinstance(df, str):
+        assert os.path.isfile(df), f"{df} is not a valid file path."
         if df.lower().endswith('json'):
             return _check_gdf_load(df)
         else:
