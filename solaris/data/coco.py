@@ -285,6 +285,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
 
     logger.info('Finished loading labels.')
     logger.info('Generating COCO-formatted annotations.')
+    print(label_df)
     coco_dataset = df_to_coco_annos(label_df,
                                     geom_col='geometry',
                                     image_id_col='image_id',
@@ -489,9 +490,9 @@ def df_to_coco_annos(df, output_path=None, geom_col='geometry',
     coco_annotations = temp_df.apply(_row_to_coco, axis=1, geom_col=geom_col,
                                      category_id_col='category_id',
                                      image_id_col=image_id_col,
-                                     score_col=score_col).tolist()
-    coco_categories = coco_categories_dict_from_df(
-        temp_df, category_id_col='category_id',
+                                     score_col=score_col).tolist() #Note to self - this will break if there are no annotations for the whole image.
+    coco_categories = coco_categories_dict_from_df(                 #I have left it's useful for highlighting stuff gone wrong making the geojsons
+        temp_df, category_id_col='category_id',                     #It should probably be swapped for a warning but I've turned them off
         category_name_col=category_col,
         supercategory_col=supercategory_col)
 
