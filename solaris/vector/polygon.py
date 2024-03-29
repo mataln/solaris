@@ -232,6 +232,8 @@ def geojson_to_px_gdf(geojson, im_path, geom_col='geometry', precision=None,
 
     """
     # get the bbox and affine transforms for the image
+    #print(im_path)
+    #print(geojson)
     im = _check_rasterio_im_load(im_path)
     if isinstance(im_path, rasterio.DatasetReader):
         im_path = im_path.name
@@ -313,6 +315,7 @@ def get_overlapping_subset(gdf, im=None, bbox=None, bbox_crs=None):
         bbox = transform_bounds(im.crs, _check_crs(gdf.crs, return_rasterio=True),
                                 *im.bounds)
         bbox_crs = im.crs
+
     # use transform_bounds in case the crs is different - no effect if not
     if isinstance(bbox, Polygon):
         bbox = bbox.bounds
@@ -325,6 +328,7 @@ def get_overlapping_subset(gdf, im=None, bbox=None, bbox_crs=None):
     else:
         bbox_crs = _check_crs(bbox_crs, return_rasterio=True)
     # currently, convert CRSs to WKT strings here to accommodate rasterio.
+    #print(bbox_crs, _check_crs(gdf.crs, return_rasterio=True))
     bbox = transform_bounds(bbox_crs,
                             _check_crs(gdf.crs, return_rasterio=True),
                             *bbox)
