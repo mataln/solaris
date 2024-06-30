@@ -2,6 +2,7 @@ import os
 import numpy as np
 from shapely.geometry import box, Polygon, Point
 import geopandas as gpd
+import pandas as pd
 from ..utils.core import _check_gdf_load, _check_crs
 from ..utils.tile import save_empty_geojson
 from ..utils.geo import get_projection_unit, split_multi_geometries
@@ -132,7 +133,8 @@ class VectorTiler(object):
                 for column in tile_gdf.columns.drop('geometry'):
                     new_row[column] = None
                 
-                tile_gdf = tile_gdf.append(new_row, ignore_index=True)
+                #tile_gdf = tile_gdf.append(new_row, ignore_index=True)
+                tile_gdf = gpd.GeoDataFrame(pd.concat([tile_gdf, gpd.GeoDataFrame([new_row])], ignore_index=True))
                 tile_gdf.to_file(dest_path, driver='GeoJSON')
 
                 #save_empty_geojson(dest_path, self.dest_crs)

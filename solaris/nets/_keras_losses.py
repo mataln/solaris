@@ -1,7 +1,7 @@
-from tensorflow.keras import losses
-from tensorflow.keras import backend as K
+#from tensorflow.keras import losses
+#from tensorflow.keras import backend as K
 from .metrics import dice_coef_binary
-import tensorflow as tf
+#import tensorflow as tf
 
 
 def k_dice_loss(y_true, y_pred):

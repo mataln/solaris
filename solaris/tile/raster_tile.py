@@ -333,8 +333,8 @@ class RasterTiler(object):
                     *tb, transform=self.src.transform,
                     width=self.src_tile_size[1],
                     height=self.src_tile_size[0])
-                print('reading data from window')
-                print(self.nodata)
+                #print('reading data from window')
+                #print(self.nodata)
                 if self.src.count != 1:
                     src_data = self.src.read(
                         window=window,

@@ -7,12 +7,12 @@ from .datagen import make_data_generator
 from .losses import get_loss
 from .optimizers import get_optimizer
 from .callbacks import get_callbacks
-from .torch_callbacks import TorchEarlyStopping, TorchTerminateOnNaN
-from .torch_callbacks import TorchModelCheckpoint
+#from .torch_callbacks import TorchEarlyStopping, TorchTerminateOnNaN
+#from .torch_callbacks import TorchModelCheckpoint
 from .metrics import get_metrics
 import torch
 from torch.optim.lr_scheduler import _LRScheduler
-import tensorflow as tf
+#import tensorflow as tf
 
 class Trainer(object):
     """Object for training `solaris` models using PyTorch or Keras. """

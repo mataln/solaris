@@ -518,12 +518,13 @@ def split_multi_geometries(gdf, obj_id_col=None, group_col=None,
     # check if the values in gdf2[geometry] are polygons; if strings, do loads
     if isinstance(gdf2[geom_col].iloc[0], str):
         gdf2[geom_col] = gdf2[geom_col].apply(loads)
-    split_geoms_gdf = pd.concat(
-        gdf2.apply(_split_multigeom_row, axis=1, geom_col=geom_col).tolist())
+    split_geoms_gdf = gpd.GeoDataFrame(
+        pd.concat(gdf2.apply(_split_multigeom_row, axis=1, geom_col=geom_col).tolist()
+                  ),
+        )
     gdf2 = gdf2.drop(index=split_geoms_gdf.index.unique())  # remove multipolygons
     gdf2 = gpd.GeoDataFrame(pd.concat([gdf2, split_geoms_gdf],
                                       ignore_index=True), crs=gdf2.crs)
-
     if obj_id_col:
         gdf2[obj_id_col] = gdf2.groupby(group_col).cumcount()+1
 

@@ -3,7 +3,7 @@ from solaris.nets.callbacks import get_lr_schedule
 from solaris.nets.torch_callbacks import TorchEarlyStopping, \
     TorchModelCheckpoint, TorchTerminateOnNaN, TorchTerminateOnMetricNaN
 
-import tensorflow as tf
+#import tensorflow as tf
 import torch
 import numpy as np
 

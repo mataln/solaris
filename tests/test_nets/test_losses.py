@@ -2,10 +2,10 @@ from solaris.nets.losses import get_loss
 from solaris.nets._keras_losses import k_jaccard_loss, k_focal_loss
 from solaris.nets._keras_losses import k_lovasz_hinge
 from solaris.nets._torch_losses import TorchFocalLoss, torch_lovasz_hinge
-from tensorflow import keras
+#from tensorflow import keras
 import torch
 import numpy as np
-import tensorflow as tf
+#import tensorflow as tf
 
 
 class TestGetLoss(object):

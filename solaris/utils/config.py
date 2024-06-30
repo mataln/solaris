@@ -1,5 +1,5 @@
 import yaml
-from ..nets import zoo
+#from ..nets import zoo
 
 
 def parse(path):

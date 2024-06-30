@@ -285,7 +285,7 @@ def geojson2coco(image_src, label_src, output_path=None, image_ext='.tif',
 
     logger.info('Finished loading labels.')
     logger.info('Generating COCO-formatted annotations.')
-    print(label_df)
+    #print(label_df)
     coco_dataset = df_to_coco_annos(label_df,
                                     geom_col='geometry',
                                     image_id_col='image_id',
